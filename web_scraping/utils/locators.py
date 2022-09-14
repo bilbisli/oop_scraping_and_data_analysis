@@ -1,33 +1,123 @@
-from collections import defaultdict
-from selenium.webdriver.common.by import By
+import abc
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import StaleElementReferenceException
 
 
 class BasePageLocators(object):
-    """A base class for page locators. All page locators should come here"""
+    """
+    Base class to pack element locators together
+    """
+    pass
 
-    default_value = (By.ID, str)
 
-    def __init__(self) -> None:
-        self.locators = defaultdict(lambda: BasePageLocators.default_value)
+class ArticlePageLocators(BasePageLocators, metaclass=abc.ABCMeta):
 
-    def __setitem__(self, locator_name: str, value):
-        """Sets the desired locator"""
-        if locator_name not in self.locators and hasattr(self, locator_name):
-            raise ValueError(f"{locator_name} is an attribute of '{self.__class__.__name__}' and can't be a locator.")
-        self.locators[locator_name] = value
+    @classmethod
+    @property
+    @abc.abstractmethod
+    def ARTICLE_TITLE(cls):
+        """throws a NotImplementedError"""
+        raise NotImplementedError('Add this locator.')
+    @classmethod
+    @property
+    @abc.abstractmethod
+    def ARTICLE_CONTENT(cls):
+        """throws a NotImplementedError"""
+        raise NotImplementedError('Add this locator.')
+    @classmethod
+    @property
+    @abc.abstractmethod
+    def ARTICLE_AUTHOR(cls):
+        """throws a NotImplementedError"""
+        raise NotImplementedError('Add this locator.')
+    @classmethod
+    @property
+    @abc.abstractmethod
+    def ARTICLE_SOURCE(cls):
+        """throws a NotImplementedError"""
+        raise NotImplementedError('Add this locator.')
+    @classmethod
+    @property
+    @abc.abstractmethod
+    def ARTICLE_DATE_TIME(cls):
+        """throws a NotImplementedError"""
+        raise NotImplementedError('Add this locator.')
 
-    def __getitem__(self, locator_name: str):
-        """Gets the desired locator (packed)"""
-        res = self.locators.get(locator_name)
-        if not res:
-            raise KeyError(f"No such locator as '{locator_name}'")
-        return res
 
-    def __getattr__(self, attr):
-        try:
-            object.__getattribute__(self, attr)
-        except Exception as e:
-            res = self.locators.get(attr)
-            if not res:
-                raise e
-            return res
+class Locator(object):
+    def __init__(self, by, loc_str, value_func=None, single=False) -> None:
+        self.by = by
+        self.loc_str = loc_str
+        self.value_func = value_func
+        self.single = single
+
+    def get_elements(self, driver, single=None, wait_time=10):
+        if single is None:
+            single = self.single
+        if single == True:
+            find_method = 'find_element'
+        else:
+            find_method = 'find_elements'
+        # ignored_exceptions=(NoSuchElementException, StaleElementReferenceException,)
+
+        
+        return WebDriverWait(driver, wait_time).until(
+        lambda driver: getattr(driver, find_method)(self.by, self.loc_str))
+
+    def get_value(self, elements, value_func=None):
+        if value_func is None:
+            value_func = self.value_func
+        if value_func is None:
+            raise AttributeError("value_func is not set and wasn't specified.")
+        return value_func(elements)
+
+
+
+
+
+
+############################################
+# second option for BasePageLocators - object based instead of class based
+############################################
+# class BasePageLocators(object):
+#     """A base class for page locators. All page locators should come here"""
+
+#     default_value = (By.ID, str)
+    
+    
+#     def __init__(self, locators=None) -> None:
+#         self.locators = defaultdict(lambda: BasePageLocators.default_value)
+
+#         if locators:
+#             for locator in locators:
+#                 self.add_locator(locator)
+
+
+#     def __setitem__(self, locator_name: str, value):
+#         """Sets the desired locator"""
+#         if locator_name not in self.locators and hasattr(self, locator_name):
+#             raise ValueError(f"{locator_name} is an attribute of '{self.__class__.__name__}' and can't be a locator.")
+#         self.locators[locator_name] = value
+
+#     def __getitem__(self, locator_name: str):
+#         """Gets the desired locator (packed)"""
+#         res = self.locators.get(locator_name)
+#         if not res:
+#             raise KeyError(f"No such locator as '{locator_name}'")
+#         return res
+
+#     def __getattr__(self, attr):
+#         try:
+#             object.__getattribute__(self, attr)
+#         except Exception as e:
+#             res = self.locators.get(attr)
+#             if not res:
+#                 raise e
+#             return res
+
+#     def add_locator(self, name: str, by: By, value: str) -> None:
+#         self.locators[name] = (by, value)
+
+#     def remove_locator(self, name: str):
+#         del self.locators[name]

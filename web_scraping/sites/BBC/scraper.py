@@ -1,31 +1,24 @@
-import chromedriver_autoinstaller as browser_installer
-from selenium.webdriver import Chrome as Driver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.chrome.options import Options
+from web_scraping.utils import Scraper
+from web_scraping.sites.BBC.locators import NewsPageLocators
+from web_scraping.sites.BBC.pages import MainPage, ArticlePage
 
 
-class Scraper(Driver):
-    """
-    This class represents a news scraping tool based on a selenium Scraper
-    """
-    def __init__(self, *args, **kwargs) -> None:
-        # Makes sure current version of the browser exists and in path (to be used as driver)
-        browser_installer.install()
+def scrape_bbc_main_page_articles(save_path=None):
+    
+    with MainPage() as main_page:
+        print('Getting article links from main page...')
+        links = main_page.get_article_links()
 
+    with ArticlePage() as article_page:
+        print('Getting articles...')
+        articles = article_page.get_articles_from_links(links)
+        if articles:
+            print('Saving articles...')
+            articles[0].save_articles(articles)
+            print('Articles saved!')
+        else:
+            print('No articles found.')
 
-
-        # Default option for scraping is headless
-        if 'options' not in kwargs:
-            kwargs['options'] = Options()
-            kwargs['options'].add_argument("--headless")
-
-        super().__init__(*args, **kwargs)
-
-
-
-        
-
-
-
+    
+if __name__ == '__main__':
+    scrape_bbc_main_page_articles()

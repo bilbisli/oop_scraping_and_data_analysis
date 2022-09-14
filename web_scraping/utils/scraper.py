@@ -18,5 +18,6 @@ class Scraper(Driver):
         if 'options' not in kwargs:
             kwargs['options'] = Options()
             kwargs['options'].add_argument("--headless")
+            kwargs['options'].add_argument("--log-level=3")
 
         super().__init__(*args, **kwargs)
