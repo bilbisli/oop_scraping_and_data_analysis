@@ -13,48 +13,56 @@ def scrape_bbc_main_page_articles(exec_num=None, timer=None, save_path='bbc_arti
 
     if verbose:
         print('Preparing scraping...')
-    update_checker = FlightBoardPage(headless=False, observer=True)
-    arrivals = FlightBoardPage(headless=False)
-    departures = FlightBoardPage(headless=False)
 
-    arriv_exec = ThreadPoolExecutor(max_workers=1)
-    depart_exec = ThreadPoolExecutor(max_workers=1)
-    save_exec = ThreadPoolExecutor(max_workers=1)
-
-    try:
-        if verbose:
-            print('Starting scraping...')
+    with (
+        FlightBoardPage(headless=False) as arrivals,
+        FlightBoardPage(headless=False) as departures,
+        ThreadPoolExecutor(max_workers=1) as save_exec,
+        ThreadPoolExecutor(max_workers=1) as arriv_exec,
+        ThreadPoolExecutor(max_workers=1) as depart_exec,
+        ):
         counter = 0
-        while 0 < exec_num or exec_num == None:                                        # TODO: timer & exec_num
+        save_vals = []
+        with FlightBoardPage(headless=False, observer=True) as update_checker:
             if verbose:
                 print('Starting scraping...')
-            counter += 1
-            print('Scraping round', counter)
-            future_arrivals_file = arriv_exec.submit(arrivals.get_arrival_flights)
-            future_departure_file = depart_exec.submit(departures.get_departure_flights)
-            save_exec.submit(save_flights, future_arrivals_file, future_departure_file)
-            update_checker.listen_for_changes()
-    finally:
-        if verbose:
-            print('Finished scraping, shutting down')
-        arriv_exec.shutdown()
-        depart_exec.shutdown()
-        save_exec.shutdown()
-        if verbose:
-            print('Finished shutdown')
+            while counter < exec_num or exec_num == None:           # TODO: timer & exec_num
+                counter += 1
+                print('Scraping round', counter)
+                future_arrivals = arriv_exec.submit(arrivals.get_arrival_flights)
+                future_departure = depart_exec.submit(departures.get_departure_flights)
+                save_exec.submit(save_flights, future_arrivals, future_departure, verbose)
+                
+                # arrival = arrivals.get_arrival_flights()
+                # print('Arrivals done!')
+                # departure = departures.get_departure_flights()
+                # print('Departures done!')
+                # save_flights(arrival, departure)
+                # print('Finished round', counter)
+
+                if counter < exec_num:
+                    update_checker.listen_for_changes()
+
+            print('All jobs in queue, finishing up and shutting down')
 
                 
-def save_flights(future_arrivals_file, future_departure_file):
-    future_arrivals = future_arrivals_file.result()
-    future_departures = future_departure_file.result()
+def save_flights(future_arrivals, future_departures, verbose=True):
+    if verbose:
+        print('saving...')
+    arrivals = future_arrivals.result()
+    departures = future_departures.result()
     print('arrivals:')
-    print(future_arrivals)
+    print(arrivals)
     print('departures:')
-    print(future_departures)
+    print(departures)
+    print('arrivals 2:')
+    print({k: tuple(v) for k, v in future_arrivals.items()})
+    print('departures 2:')
+    print({k: tuple(v) for k, v in future_departures.items()})
 
 
 if __name__ == '__main__':
-    scrape_bbc_main_page_articles(exec_num=4)
+    scrape_bbc_main_page_articles(exec_num=1)
 
 
 

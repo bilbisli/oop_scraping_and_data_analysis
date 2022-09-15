@@ -16,4 +16,4 @@ class BasePage(object):
     def __exit__(self, exc_type, exc_value, traceback):
         if traceback:
             print(traceback)
-        self.driver.close()
+        self.driver.quit()

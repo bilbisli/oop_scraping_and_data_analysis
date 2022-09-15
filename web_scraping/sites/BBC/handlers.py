@@ -4,7 +4,7 @@ from web_scraping.sites.BBC.locators import NewsPageLocators, SportPageLocators
 
 class NewsPageHandler(BasePageHandler):
     """Concrete Handler for normal news page articles"""
-    def __init__(self, nxt):
+    def __init__(self, nxt=None):
         locators = NewsPageLocators
         super().__init__(nxt, locators)
 

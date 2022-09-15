@@ -19,3 +19,11 @@ class LoadMoreButton(BasePageElement):
             if curr_results_loc == all_results_loc:
                 break
             self.click(driver)
+
+
+class ArrivalTab(BasePageElement):
+    locator = FlightPageLocators.ARRIVAL_FLIGHTS_TAB
+
+
+class DepartureTab(BasePageElement):
+    locator = FlightPageLocators.DEPARTURE_FLIGHTS_TAB

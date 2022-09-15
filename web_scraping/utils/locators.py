@@ -79,13 +79,15 @@ class Locator(object):
         return value_func(elements)
 
     def get_end_value(self, driver, value_func=None, single=None, wait_time=10, exp_cond=None):
+        print('elements get!', self.loc_str)
         elements = self.get_elements(
             driver=driver, 
             single=single, 
             wait_time=wait_time, 
             exp_cond=exp_cond)
+        print('values get!', self.loc_str)
         value = self.get_value(elements, value_func)
-
+        print('got value!', self.loc_str)
         return value
 
 

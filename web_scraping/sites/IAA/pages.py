@@ -1,14 +1,18 @@
 
-from collections import defaultdict
 from web_scraping.utils import BasePage
 from web_scraping.utils import Scraper
 from web_scraping.sites.IAA.locators import FlightPageLocators
-from web_scraping.sites.IAA.elements import UpdateButton, LoadMoreButton
+from web_scraping.sites.IAA.elements import ArrivalTab, DepartureTab, UpdateButton, LoadMoreButton
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from concurrent.futures import ThreadPoolExecutor
+# from concurrent.futures import ProcessPoolExecutor
+# from pathos.multiprocessing import ProcessingPool
 
+# import dill as pickle
+# import copyreg
+# import types
 
 
 class FlightBoardPage(BasePage):
@@ -24,6 +28,8 @@ class FlightBoardPage(BasePage):
         
         self.update_button = UpdateButton()
         self.load_button = LoadMoreButton()
+        self.arrival_tab = ArrivalTab()
+        self.departure_tab = DepartureTab()
 
         if observer is True:
             self.load_observable()
@@ -88,13 +94,13 @@ class FlightBoardPage(BasePage):
         if locator is None:
             locator = FlightPageLocators.ARRIVAL_FLIGHTS_TABLE
         
-        arrivals_data = self.get_shared_data(locator)
-
+        arrivals_data = self.get_data(locator)
         return arrivals_data
 
     def get_departure_flights(self, locator=None):
 
-        self.drive.refresh()
+        self.driver.refresh()
+        self.departure_tab.click(self.driver)
         self.toggle_flight_update()
 
         if locator is None:
@@ -119,41 +125,82 @@ class FlightBoardPage(BasePage):
         # self.toggle_flight_update()
         table_element = locator.get_elements(self.driver, single=True)
 
-        self.load_button.load_all_results(self.driver)
+        self.load_button.load_all_results(table_element)
         
         # old_element = FlightPageLocators.AIRLINES.get_elements(self.driver, single=True)
-        
-        
-        table_values = dict()
-        print('1')
-        table_values['airline'] = FlightPageLocators.AIRLINES.get_end_value
-        print('2')
-        table_values['flight'] = FlightPageLocators.FLIGHT_NUMBERS.get_end_value
-        print('3')
-        table_values['city'] = FlightPageLocators.FLIGHT_CITIES.get_end_value
-        print('4')
-        table_values['terminal'] = FlightPageLocators.FLIGHT_TERMINAL.get_end_value
-        print('5')
-        table_values['schedule_time'] = FlightPageLocators.FLIGHT_SCH_TIMES.get_end_value
-        print('6')
-        table_values['schedule_date'] = FlightPageLocators.FLIGHT_SCH_DATES.get_end_value
-        print('7')
-        table_values['updated_time'] = FlightPageLocators.FLIGHT_CURR_TIME.get_end_value
-        print('8')
-        table_values['status'] = FlightPageLocators.FLIGHT_STATUSES.get_end_value
-        
-        if additional == 'departure':
-            print('9')
-            table_values['check_in_counter'] = FlightPageLocators.FLIGHT_COUNTER
-        
-        with ThreadPoolExecutor(max_workers=len(table_values)) as get_end_values_exec:
-            for field, func in table_values.items():
-                table_values[field] = get_end_values_exec.submit(func, table_element)
-            
-            # simulate a join for threadpool
-            for field, func in table_values.items():
-                table_values[field] = table_values[field].result()
+        fields = [
+            'airline',
+            'flight',
+            'city',
+            'terminal',
+            'schedule_time',
+            'schedule_date',
+            'updated_time',
+            'status',
+        ]
+        locators = [
+            FlightPageLocators.AIRLINES,
+            FlightPageLocators.FLIGHT_NUMBERS,
+            FlightPageLocators.FLIGHT_CITIES,
+            FlightPageLocators.FLIGHT_TERMINAL,
+            FlightPageLocators.FLIGHT_SCH_TIMES,
+            FlightPageLocators.FLIGHT_SCH_DATES,
+            FlightPageLocators.FLIGHT_CURR_TIME,
+            FlightPageLocators.FLIGHT_STATUSES,
+        ]
 
+        if additional == 'departure':
+            fields.append('checkin_counter')
+            locators.append(FlightPageLocators.FLIGHT_COUNTER)
+
+        future_elements, elements = [], []
+        future_values, values = [], []
+        with ThreadPoolExecutor(max_workers=len(fields)) as elements_pool:
+            for loc in locators:
+                future_elements.append(elements_pool.submit(loc.get_end_value, self.driver))
+            # simluate thread pool join
+            for fut_ele in future_elements:
+                elements.append(fut_ele.result())
+
+        
+        table_values = dict(zip(fields, elements))
+
+
+
+        # print('1')
+        # table_values['airline'] = FlightPageLocators.AIRLINES.get_elements
+        # print('2')
+        # table_values['flight'] = FlightPageLocators.FLIGHT_NUMBERS.get_elements
+        # print('3')
+        # table_values['city'] = FlightPageLocators.FLIGHT_CITIES.get_elements
+        # print('4')
+        # table_values['terminal'] = FlightPageLocators.FLIGHT_TERMINAL.get_elements
+        # print('5')
+        # table_values['schedule_time'] = FlightPageLocators.FLIGHT_SCH_TIMES.get_elements
+        # print('6')
+        # table_values['schedule_date'] = FlightPageLocators.FLIGHT_SCH_DATES.get_elements
+        # print('7')
+        # table_values['updated_time'] = FlightPageLocators.FLIGHT_CURR_TIME.get_elements
+        # print('8')
+        # table_values['status'] = FlightPageLocators.FLIGHT_STATUSES.get_elements
+        # if additional == 'departure':
+        #     print('9')
+        #     table_values['check_in_counter'] = FlightPageLocators.FLIGHT_COUNTER.get_end_value
+        
+        # with ThreadPoolExecutor(max_workers=len(table_values)) as get_end_values_exec:
+        #     for field, func in table_values.items():
+        #         table_values[field] = get_end_values_exec.submit(func, table_element)
+        #     print('got elements - getting values')
+        #     for field, ele in table_values.items():
+        #         table_values[field] = get_end_values_exec.submit(
+        #             lambda eles: 
+        #                 ele.result().get_value
+        #             )
+        #     print('got values')
+        #     # simulate a join for threadpool
+        #     for field, func in table_values.items():
+        #         table_values[field] = table_values[field].result()
+        
         print('done')
         return table_values
 
