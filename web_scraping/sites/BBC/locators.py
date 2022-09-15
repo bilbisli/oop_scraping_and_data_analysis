@@ -11,9 +11,9 @@ class HomePageLocators(BasePageLocators):
         By.CSS_SELECTOR, 
         "a.block-link__overlay-link:not([rev*='video'],[rev*='picture'],[href*='/reel/'],[href*='/video/'],[href*='/av/'])")
     ARTICLE_LINKS = copy(ARTICLE_ELEMENT)
-    ARTICLE_LINKS.value_func = lambda artcl_ele: artcl_ele.get_attribute('href')
+    ARTICLE_LINKS.value_func = lambda artcl_eles: [ele.get_attribute('href') for ele in artcl_eles]
     ARTICLE_TITLES = copy(ARTICLE_ELEMENT)
-    ARTICLE_TITLES.value_func = lambda artcl_ele: artcl_ele.text
+    ARTICLE_TITLES.value_func = lambda artcl_eles: [ele.text for ele in artcl_eles]
 
    
 class NewsPageLocators(ArticlePageLocators):

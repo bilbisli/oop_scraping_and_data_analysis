@@ -46,24 +46,30 @@ class ArticlePageLocators(BasePageLocators, metaclass=abc.ABCMeta):
 
 
 class Locator(object):
-    def __init__(self, by, loc_str, value_func=None, single=False) -> None:
+    def __init__(self, by, loc_str, value_func=None, single=False, exp_cond=None) -> None:
         self.by = by
         self.loc_str = loc_str
         self.value_func = value_func
         self.single = single
+        self.exp_cond = exp_cond
 
-    def get_elements(self, driver, single=None, wait_time=10):
+    def get_elements(self, driver, single=None, wait_time=10, exp_cond=None):
         if single is None:
             single = self.single
         if single == True:
             find_method = 'find_element'
         else:
             find_method = 'find_elements'
-        # ignored_exceptions=(NoSuchElementException, StaleElementReferenceException,)
-
+        if exp_cond is None:
+            exp_cond = self.exp_cond
+        ignored_exceptions=(NoSuchElementException, StaleElementReferenceException,)
+        ignored_exceptions = None
+        if exp_cond is None:
+            get_func = lambda driver: getattr(driver, find_method)(self.by, self.loc_str)
+        else:
+            get_func = exp_cond((self.by, self.loc_str))
         
-        return WebDriverWait(driver, wait_time).until(
-        lambda driver: getattr(driver, find_method)(self.by, self.loc_str))
+        return WebDriverWait(driver, wait_time, ignored_exceptions=ignored_exceptions).until(get_func)
 
     def get_value(self, elements, value_func=None):
         if value_func is None:
@@ -72,6 +78,15 @@ class Locator(object):
             raise AttributeError("value_func is not set and wasn't specified.")
         return value_func(elements)
 
+    def get_end_value(self, driver, value_func=None, single=None, wait_time=10, exp_cond=None):
+        elements = self.get_elements(
+            driver=driver, 
+            single=single, 
+            wait_time=wait_time, 
+            exp_cond=exp_cond)
+        value = self.get_value(elements, value_func)
+
+        return value
 
 
 

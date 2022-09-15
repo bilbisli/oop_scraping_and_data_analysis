@@ -22,7 +22,6 @@ class Article(object):
     @staticmethod
     def save_articles(articles, save_path='bbc_articles.csv', encoding='UTF8'):
         if not articles:
-            print('No articles to save.')
             return
 
         if os.path.exists(save_path):

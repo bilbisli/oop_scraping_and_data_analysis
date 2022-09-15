@@ -15,9 +15,20 @@ class Scraper(Driver):
         browser_installer.install()
 
         # Default option for scraping is headless
-        if 'options' not in kwargs:
+        if 'options' not in kwargs or kwargs['options'] == 'add':
             kwargs['options'] = Options()
-            kwargs['options'].add_argument("--headless")
-            kwargs['options'].add_argument("--log-level=3")
+            kwargs['options'] = self.get_options()
 
         super().__init__(*args, **kwargs)
+    
+    @staticmethod
+    def get_options():
+        options = Options()
+        options.add_argument("--headless")
+        options.add_argument('--disable-gpu')
+        options.add_argument("--log-level=3")
+        options.add_argument("--disable-notifications")
+        options.add_argument("--window-size=2160,3840")
+        options.add_argument('--ignore-ssl-errors')
+        # options.add_argument('--no-sandbox')
+        return options

@@ -24,10 +24,7 @@ class MainPage(BasePage):
         if locator is None:
             locator = self.article_locator
 
-        article_elements = locator.get_elements(self.driver)
-        for article_element in article_elements:
-            link = locator.get_value(article_element)
-            self.article_links.append(link)
+        self.article_links = locator.get_end_value(self.driver)
         return self.article_links
 
 
@@ -56,44 +53,44 @@ class ArticlePage(BasePage):
         self.articles = []
         self.handler = NewsPageHandler(SportsPageHandler(None))
 
-    def get_articles_from_links(self, article_links=None):
+    def get_articles_from_links(self, article_links=None, verbose=True):
         if article_links is None:
             article_links = self.article_links
         
-        articles_bar = tqdm(article_links, leave=False)
+        articles_bar = tqdm(article_links, leave=False, disable=not verbose)
         for link in articles_bar:
             locator_cls = self.handler.handle(link)
             if locator_cls is not None:
                 self.driver.get(link)
-                # print('getting title')
+                # print(link)
                 try:
-                    title_element = locator_cls.ARTICLE_TITLE.get_elements(self.driver, single=True)
-                    title = locator_cls.ARTICLE_TITLE.get_value(title_element)
+                    title = locator_cls.ARTICLE_TITLE.get_end_value(self.driver, single=True)
                 except Exception as e:
+                    # print('1')
                     continue
                 # print('getting content')
                 try:
-                    content_elements = locator_cls.ARTICLE_CONTENT.get_elements(self.driver)
-                    content = locator_cls.ARTICLE_CONTENT.get_value(content_elements)
+                    content = locator_cls.ARTICLE_CONTENT.get_end_value(self.driver)
                 except Exception as e:
+                    # print('2')
                     continue
                 # print('getting date_time')
                 try:
-                    date_time_element = locator_cls.ARTICLE_DATE_TIME.get_elements(self.driver, single=True)
-                    date_time = locator_cls.ARTICLE_DATE_TIME.get_value(date_time_element)
+                    date_time = locator_cls.ARTICLE_DATE_TIME.get_end_value(self.driver, single=True)
                 except Exception as e:
+                    # print('3')
                     date_time = None
                 # print('getting author')
                 try:
-                    author_element = locator_cls.ARTICLE_AUTHOR.get_elements(self.driver, single=True, wait_time=0.5)
-                    author = locator_cls.ARTICLE_AUTHOR.get_value(author_element)
+                    author = locator_cls.ARTICLE_AUTHOR.get_end_value(self.driver, single=True, wait_time=0.5)
                 except Exception as e:
+                    # print('4')
                     author = ''
                 # print('getting source')
                 try:
-                    source_element = locator_cls.ARTICLE_SOURCE.get_elements(self.driver, single=True, wait_time=0.5)
-                    source = locator_cls.ARTICLE_SOURCE.get_value(source_element)
+                    source = locator_cls.ARTICLE_SOURCE.get_end_value(self.driver, single=True, wait_time=0.5)
                 except Exception as e:
+                    # print('5')
                     source = ''
                 article = Article(title, link, content, date_time, author, source)
                 self.articles.append(article)
