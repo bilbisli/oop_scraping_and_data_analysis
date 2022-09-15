@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 
 class FlightPageLocators(BasePageLocators):
     # shared between arrivals and departures
+    TABLE_BODY = Locator(By.CSS_SELECTOR, ".tabs-content tbody", single=True)
     UPDATE_BUTTON = Locator(By.ID, "toggleAutoUpdate", single=True)
     LOAD_MORE_BUTTON = Locator(By.ID, "next", single=True)
     CURRENT_RESULTS = Locator(By.ID, 'numOfResults', lambda ele: ele.text, single=True)
@@ -24,4 +25,4 @@ class FlightPageLocators(BasePageLocators):
     # departurs
     DEPARTURE_FLIGHTS_TAB = Locator(By.ID, "tab--departures_flights-label", single=True)
     DEPARTURE_FLIGHTS_TABLE = Locator(By.ID, "flight_board-departures_table", single=True)
-
+    FLIGHT_COUNTER = Locator(By.CLASS_NAME, "td-counter", lambda eles: [ele.text for ele in eles])
