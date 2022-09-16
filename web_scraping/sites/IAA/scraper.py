@@ -11,7 +11,7 @@ MINUTE = 60
 TIME_FACTOR = MINUTE
 
 
-def scrape_bbc_main_page_articles(exec_num=None, scrape_time=None, save_path='flight_data.csv', verbose=True):
+def scrape_bbc_main_page_articles(exec_num=None, scrape_time=None, save_path='flight_data.json', verbose=True):
 
     if verbose:
         print('Preparing scraping...')
@@ -77,15 +77,16 @@ def save_flights(future_arrivals, future_departures, save_path, verbose=True):
 
 
     unified_dict = dict()
-    unified_dict['flights'] = defaultdict(list)
+    unified_dict['flights'] = {'arrivals': {}, 'departures': {}}
     arr_fields = arrivals.keys()
     dep_fields = departures.keys()
     arrivals_packed = list(zip(*arrivals.values()))
     departues_packed = list(zip(*departures.values()))
+    
     for flight in arrivals_packed:
-        unified_dict['flights']['arrivals'].append(dict(zip(arr_fields, flight)))
+        unified_dict['flights']['arrivals'] = dict(zip(arr_fields, flight))
     for flight in departues_packed:
-        unified_dict['flights']['departures'].append(dict(zip(dep_fields, flight)))
+        unified_dict['flights']['departures'] = dict(zip(dep_fields, flight))
     
     print('arrivals:')
     # print(arrivals)
@@ -102,10 +103,10 @@ def save_flights(future_arrivals, future_departures, save_path, verbose=True):
         
     print(unified_dict)
 
-    merge(master_dict, unified_dict, strategy=Strategy.ADDITIVE)
+    merge(master_dict, unified_dict, strategy=Strategy.REPLACE)
     
     # unique_end = datetime.now().strftime("%j_%H_%M_%S_%f_%Y")
-    with open(f'{save_path}.json', 'w') as fp:
+    with open(save_path, 'w') as fp:
         json.dump(master_dict, fp, indent=4, sort_keys=True)
 
     if verbose:
