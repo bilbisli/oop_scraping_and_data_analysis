@@ -5,8 +5,8 @@ MAX_INPUT_LENGTH = 1024
 
 def summarize_article(article, max_length=100, min_length=30):
     summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
-    if max_len > 1024:
-        max_len = MAX_INPUT_LENGTH
+    if max_length > 1024:
+        max_length = MAX_INPUT_LENGTH
     print(summarizer(article, max_length=max_length, min_length=min_length, do_sample=False, truncation=True))
 
 
