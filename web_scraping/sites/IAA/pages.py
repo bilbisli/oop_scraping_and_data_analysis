@@ -6,7 +6,7 @@ from web_scraping.sites.IAA.elements import *
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from concurrent.futures import ThreadPoolExecutor
-from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.by import By
 
 
 MAXIMUM_WAIT_FOR_UPDATE_MINUTES = 30
@@ -60,17 +60,11 @@ class FlightBoardPage(BasePage):
         
         prev_time = self.updated_time
         while prev_time == self.updated_time:
-            print('update')
-            # print('update', prev_time, self.updated_time)
             WebDriverWait(listener, 
                 TIME_INTERVAL
                 ).until(EC.staleness_of(obsrvbl_elmnt))
-            # time_obs = FlightPageLocators.UPDATED_TIME
-            # updated_time = time_obs.get_end_value(listener, single=True)
             self.load_observable()
-            print(prev_time, self.updated_time)
             obsrvbl_elmnt = self.obsrvbl_elmnt
-        print('table changed')
         prev_time = self.updated_time
 
     def toggle_flight_update(self, driver=None, button=None):
@@ -83,7 +77,6 @@ class FlightBoardPage(BasePage):
         button.click(self.driver, tries=3)
 
     def get_arrival_flights(self, locator=None):
-        print('getting arrivals')
         self.driver.refresh()
         self.toggle_flight_update()
 
@@ -91,11 +84,9 @@ class FlightBoardPage(BasePage):
             locator = FlightPageLocators.ARRIVAL_FLIGHTS_TABLE
         
         arrivals_data = self.get_data(locator)
-        print('finished getting arrivals')
         return arrivals_data
 
     def get_departure_flights(self, locator=None):
-        print('getting departures')
         self.driver.refresh()
         self.departure_tab.click(self.driver)
         self.toggle_flight_update()
@@ -104,7 +95,6 @@ class FlightBoardPage(BasePage):
             locator = FlightPageLocators.DEPARTURE_FLIGHTS_TABLE
         
         departures_data = self.get_data(locator, additional='departure')
-        print('finished getting departures')
         return departures_data
     
     def get_data(self, locator, additional=None):
@@ -136,13 +126,36 @@ class FlightBoardPage(BasePage):
             fields.append('checkin_counter')
             locators.append(FlightPageLocators.FLIGHT_COUNTER)
 
-        future_elements, elements = [], []
+        # values = self.get_values_slow(table_element, locators)
+        values = self.get_values_fast(locators)
+        
+        table_values = dict(zip(fields, values))
+        
+        return table_values
+
+    def get_values_fast(self, locators):
+        values = []
+        for loc in locators:
+            query_str = loc.loc_str
+            if loc.by == By.CLASS_NAME:
+                query_str = '.' + query_str
+            values.append(
+                self.driver.execute_script(
+                    f'return [...document.querySelectorAll("{query_str}")].map(x => x.textContent)'
+                )
+            )
+        return values
+
+    def get_values_slow(self, table_element, locators):
+        future_elements, values = [], []
         with ThreadPoolExecutor(max_workers=9) as elements_pool:
             for loc in locators:
                 future_elements.append(elements_pool.submit(loc.get_end_value, table_element))
             # simluate thread pool join
             for fut_ele in future_elements:
-                elements.append(fut_ele.result())
+                values.append(fut_ele.result())
+        return values
 
-        table_values = dict(zip(fields, elements))
-        return table_values
+
+    
+

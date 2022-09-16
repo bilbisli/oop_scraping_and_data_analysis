@@ -32,6 +32,7 @@ class FlightPageLocators(BasePageLocators):
     LOAD_MORE_BUTTON = Locator(By.ID, "next", single=True)
     CURRENT_RESULTS = Locator(By.ID, 'numOfResults', lambda ele: ele.text, single=True)
     ALL_RESULTS = Locator(By.ID, 'totalItems', lambda ele: ele.text, single=True)
+    
     AIRLINES = Locator(By.CLASS_NAME, "td-airline", get_multi_text)
     FLIGHT_NUMBERS = Locator(By.CLASS_NAME, "td-flight", get_multi_text)
     FLIGHT_CITIES = Locator(By.CLASS_NAME, "td-city", get_multi_text)
