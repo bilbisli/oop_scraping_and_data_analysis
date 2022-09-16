@@ -7,12 +7,17 @@ from concurrent.futures import ThreadPoolExecutor
 
 def get_multi_text(elements):
     try:
+        l = map(lambda ele: ele.get_attribute("textContent"), elements)
+        l = list(l)
+        return l
+    except:
+        return [element.text for element in elements]
+
+def get_multi_text_threads(elements):
+    try:
         with ThreadPoolExecutor(max_workers=10) as ele_exec:
-            print('building')
             l = ele_exec.map(lambda ele: ele.get_attribute("textContent"), elements)
-            # l = [ele.get_attribute("textContent") for ele in elements]
             l = list(l)
-        print('built')
         return l
     except:
         return [element.text for element in elements]
@@ -21,6 +26,7 @@ def get_multi_text(elements):
 class FlightPageLocators(BasePageLocators):
 
     # shared between arrivals and departures
+    UPDATED_TIME = Locator(By.ID, "lastUpdateTime", lambda ele: ele.text, single=True)
     TABLE_BODY = Locator(By.CSS_SELECTOR, ".tabs-content tbody", single=True)
     UPDATE_BUTTON = Locator(By.ID, "toggleAutoUpdate", single=True)
     LOAD_MORE_BUTTON = Locator(By.ID, "next", single=True)

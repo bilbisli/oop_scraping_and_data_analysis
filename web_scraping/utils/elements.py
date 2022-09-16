@@ -36,8 +36,23 @@ class BasePageElement(object, metaclass=abc.ABCMeta):
         
         return element.get_attribute("value")
 
-    def click(self, driver, wait_time=20):
-        button = WebDriverWait(driver, wait_time).until(
-            EC.element_to_be_clickable((
-                self.locator.by, self.locator.loc_str)))
+    def click(self, 
+        driver, 
+        wait_time=20,
+        exp_cond=EC.element_to_be_clickable, 
+        tries=1, 
+        refresh_between_tries=False,
+    ):
+        button = self.locator.get_elements(
+            driver=driver, 
+            wait_time=wait_time, 
+            exp_cond=exp_cond,
+            tries=tries,
+            refresh_between_tries=refresh_between_tries,
+            single=True
+        )
+        
+        
+        # WebDriverWait(driver, wait_time).until(
+        #     EC.element_to_be_clickable((self.locator.by, self.locator.loc_str)))
         driver.execute_script("arguments[0].click();", button)

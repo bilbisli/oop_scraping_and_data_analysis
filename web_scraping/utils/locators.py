@@ -2,6 +2,7 @@ import abc
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
+from selenium.common.exceptions import TimeoutException
 
 
 class BasePageLocators(object):
@@ -53,7 +54,16 @@ class Locator(object):
         self.single = single
         self.exp_cond = exp_cond
 
-    def get_elements(self, driver, single=None, wait_time=10, exp_cond=None):
+    def get_elements(
+        self, 
+        driver, 
+        single=None, 
+        wait_time=10, 
+        exp_cond=None, 
+        tries=1, 
+        refresh_between_tries=False,
+    ):
+        
         if single is None:
             single = self.single
         if single == True:
@@ -69,72 +79,32 @@ class Locator(object):
         else:
             get_func = exp_cond((self.by, self.loc_str))
         
-        return WebDriverWait(driver, wait_time, ignored_exceptions=ignored_exceptions).until(get_func)
+        for i in range(tries, 0, -1):
+            try:
+                return WebDriverWait(driver,
+                    wait_time, 
+                    ignored_exceptions=ignored_exceptions).until(get_func)
+            except TimeoutException:
+                if i - 1 == 0:
+                    raise
+                print(f'Element retrieval failed - tries left: {i - 1}')
+                if refresh_between_tries:
+                    driver.refresh()
 
     def get_value(self, elements, value_func=None):
         if value_func is None:
             value_func = self.value_func
         if value_func is None:
             raise AttributeError("value_func is not set and wasn't specified.")
+        
         return value_func(elements)
 
     def get_end_value(self, driver, value_func=None, single=None, wait_time=10, exp_cond=None):
-        print('elements get!', self.loc_str)
         elements = self.get_elements(
             driver=driver, 
             single=single, 
             wait_time=wait_time, 
             exp_cond=exp_cond)
-        print('values get!', self.loc_str)
         value = self.get_value(elements, value_func)
-        print('got value!', self.loc_str)
+
         return value
-
-
-
-
-
-############################################
-# second option for BasePageLocators - object based instead of class based
-############################################
-# class BasePageLocators(object):
-#     """A base class for page locators. All page locators should come here"""
-
-#     default_value = (By.ID, str)
-    
-    
-#     def __init__(self, locators=None) -> None:
-#         self.locators = defaultdict(lambda: BasePageLocators.default_value)
-
-#         if locators:
-#             for locator in locators:
-#                 self.add_locator(locator)
-
-
-#     def __setitem__(self, locator_name: str, value):
-#         """Sets the desired locator"""
-#         if locator_name not in self.locators and hasattr(self, locator_name):
-#             raise ValueError(f"{locator_name} is an attribute of '{self.__class__.__name__}' and can't be a locator.")
-#         self.locators[locator_name] = value
-
-#     def __getitem__(self, locator_name: str):
-#         """Gets the desired locator (packed)"""
-#         res = self.locators.get(locator_name)
-#         if not res:
-#             raise KeyError(f"No such locator as '{locator_name}'")
-#         return res
-
-#     def __getattr__(self, attr):
-#         try:
-#             object.__getattribute__(self, attr)
-#         except Exception as e:
-#             res = self.locators.get(attr)
-#             if not res:
-#                 raise e
-#             return res
-
-#     def add_locator(self, name: str, by: By, value: str) -> None:
-#         self.locators[name] = (by, value)
-
-#     def remove_locator(self, name: str):
-#         del self.locators[name]

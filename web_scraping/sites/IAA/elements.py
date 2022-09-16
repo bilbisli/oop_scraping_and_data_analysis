@@ -15,7 +15,6 @@ class LoadMoreButton(BasePageElement):
         while True:
             curr_results_loc = FlightPageLocators.CURRENT_RESULTS.get_end_value(driver, single=True)
             all_results_loc = FlightPageLocators.ALL_RESULTS.get_end_value(driver, single=True)
-            # print(curr_results_loc, '/', all_results_loc)
             if curr_results_loc == all_results_loc:
                 break
             self.click(driver)
