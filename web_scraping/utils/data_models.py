@@ -36,7 +36,7 @@ class Article(object):
 
         if os.path.exists(save_path):
             with open(save_path, "r", newline='', encoding=encoding) as csv_file:
-                csv_reader = csv.reader(csv_file)
+                csv_reader = csv.reader(csv_file, delimiter=',')
                 fields = next(csv_reader)
             with open(save_path, "a", newline='', encoding=encoding) as csv_file:
                 writer = csv.writer(csv_file, delimiter=',')

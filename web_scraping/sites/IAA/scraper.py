@@ -24,7 +24,7 @@ def scrape_iaa_flights(exec_num=None, scrape_time=None, save_path='flight_data.j
         # ThreadPoolExecutor(max_workers=1) as depart_exec,
         ):
         counter = 0
-        with FlightBoardPage(observer=True, headless=False) as update_checker:
+        with FlightBoardPage(observer=True, headless=True) as update_checker:
             start_time = timer()
             if verbose:
                 print(f'{get_time()}: Starting scraping...')

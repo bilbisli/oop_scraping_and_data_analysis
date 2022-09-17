@@ -4,10 +4,12 @@ from transformers import pipeline
 MAX_INPUT_LENGTH = 1024
 
 
-def summarize(article, max_length=100, min_length=50):
-    print('model')
-    summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
-    print('summ')
+def summarize(article, model=None, max_length=100, min_length=50):
+
+    if model is None:
+        summarizer = get_model()
+    else:
+        summarizer = model
     if max_length > MAX_INPUT_LENGTH:
         max_length = MAX_INPUT_LENGTH
     res = summarizer(article, 
@@ -16,6 +18,9 @@ def summarize(article, max_length=100, min_length=50):
         truncation=True,
     )
     return res[0]
+
+def get_model():
+    return pipeline("summarization", model="facebook/bart-large-cnn")
 
 
 # if __name__ == '__main__':
