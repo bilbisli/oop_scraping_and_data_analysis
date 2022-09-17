@@ -1,9 +1,9 @@
 from collections import defaultdict
 from web_scraping.sites.IAA.pages import FlightBoardPage
-from concurrent.futures import ThreadPoolExecutor
+# from concurrent.futures import ThreadPoolExecutor     # for speeding slow value retrieval
 from mergedeep import merge, Strategy
 from timeit import default_timer as timer
-from datetime import datetime
+from web_scraping.utils.tools import get_time
 import json
 
 
@@ -39,12 +39,17 @@ def scrape_iaa_flights(exec_num=None, scrape_time=None, save_path='flight_data.j
                 # save_exec.submit(save_flights, future_arrivals, future_departure, save_path, verbose)
                 
                 # for fast value get no threads are needed
+                if verbose:
+                    print(f'{get_time()}: Fetching flights...')
                 arrival = arrivals.get_arrival_flights()
-                print('Arrivals done!')
                 departure = departures.get_departure_flights()
-                print('Departures done!')
+                if verbose:
+                    print(f'{get_time()}: Flights fetched')
+                if verbose:
+                    print(f'{get_time()}: saving...')
                 save_flights(arrival, departure, save_path=save_path)
-                print('Finished round', counter)
+                if verbose:
+                    print(f'{get_time()}: Saved!')
 
                 if check_conditions(exec_num, scrape_time, start_time, counter):
                     update_checker.listen_for_changes()
@@ -64,17 +69,12 @@ def check_conditions(exec_num, scrape_time, start_time, counter):
     res =  cond1 or cond2 or cond3 or cond4
     return res
 
-def get_time():
-    return datetime.now().strftime("%Y/%m/%d %H:%M:%S")
-
-def save_flights(arrivals, departures, save_path, encoding='utf-8', verbose=True):
+def save_flights(arrivals, departures, save_path, encoding='utf-8'):
     
     ## for slow value get - future result retrival
     # arrivals = arrivals.result()
     # departures = departures.result()
 
-    if verbose:
-        print(f'{get_time()}: saving...')
     unified_dict = dict()
     unified_dict['flights'] = {'arrivals': {}, 'departures': {}}
     arr_fields = arrivals.keys()
@@ -98,9 +98,7 @@ def save_flights(arrivals, departures, save_path, encoding='utf-8', verbose=True
     merge(master_dict, unified_dict, strategy=Strategy.REPLACE)
     with open(save_path, 'w', encoding=encoding) as fp:
         json.dump(master_dict, fp, indent=4, sort_keys=True, ensure_ascii=False)
-    if verbose:
-        print(f'{get_time()}: Saving done')
 
 
 if __name__ == '__main__':
-    scrape_iaa_flights(exec_num=5)
+    scrape_iaa_flights(exec_num=3)
