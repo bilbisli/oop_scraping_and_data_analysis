@@ -1,4 +1,6 @@
 from transformers import pipeline
+from transformers import logging
+
 
 
 class SentimentAnalysis(object):
@@ -16,18 +18,19 @@ class SentimentAnalysis(object):
 
     @classmethod
     def get_model(cls, model_name=None):
+        logging.set_verbosity_error()
         if model_name is None:
             model_name = cls.model_name
         return pipeline("sentiment-analysis", 
             model=model_name, 
             tokenizer=model_name, 
-            max_length=cls.MAX_INPUT_LENGTH
-        )
+            max_length=cls.MAX_INPUT_LENGTH)
 
 
 class ArticleSummarization(object):
 
     MAX_INPUT_LENGTH = 1024
+    model_name = "facebook/bart-large-cnn"
 
     @classmethod
     def summarize(cls, article, model=None, max_length=100, min_length=50):
@@ -45,8 +48,10 @@ class ArticleSummarization(object):
         return res[0]
 
     @classmethod
-    def get_model(cls):
-        return pipeline("summarization", model="facebook/bart-large-cnn")
+    def get_model(cls, model_name=None):
+        if model_name is None:
+            model_name = cls.model_name
+        return pipeline("summarization", model=model_name, tokenizer=model_name)
 
 
 if __name__ == '__main__':
