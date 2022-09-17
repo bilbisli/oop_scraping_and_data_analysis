@@ -60,8 +60,9 @@ class FlightBoardPage(BasePage):
         
         prev_time = self.updated_time
         while prev_time == self.updated_time:
+            
             WebDriverWait(listener, 
-                TIME_INTERVAL
+                TIME_INTERVAL,
                 ).until(EC.staleness_of(obsrvbl_elmnt))
             self.load_observable()
             obsrvbl_elmnt = self.obsrvbl_elmnt

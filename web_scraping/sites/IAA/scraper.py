@@ -18,13 +18,13 @@ def scrape_iaa_flights(exec_num=None, scrape_time=None, save_path='flight_data.j
     with (
         FlightBoardPage(headless=False) as arrivals,
         FlightBoardPage(headless=False) as departures,
-        ## threads are used when slow value get is done to improve the performance
+        ## threads are used when slow value get is done to serve as queue
         # ThreadPoolExecutor(max_workers=1) as save_exec,
         # ThreadPoolExecutor(max_workers=1) as arriv_exec,
         # ThreadPoolExecutor(max_workers=1) as depart_exec,
         ):
         counter = 0
-        with FlightBoardPage(observer=True, headless=True) as update_checker:
+        with FlightBoardPage(observer=True, headless=False) as update_checker:
             start_time = timer()
             if verbose:
                 print(f'{get_time()}: Starting scraping...')
@@ -33,7 +33,7 @@ def scrape_iaa_flights(exec_num=None, scrape_time=None, save_path='flight_data.j
                 if verbose:
                     print(f'{get_time()}: Scraping round', counter)
 
-                ## improving slow values get with threads
+                ## using threads as queue when using slow value get so as not to interrupt current data retrieval
                 # future_arrivals = arriv_exec.submit(arrivals.get_arrival_flights)
                 # future_departure = depart_exec.submit(departures.get_departure_flights)
                 # save_exec.submit(save_flights, future_arrivals, future_departure, save_path, verbose)
@@ -52,6 +52,8 @@ def scrape_iaa_flights(exec_num=None, scrape_time=None, save_path='flight_data.j
                     print(f'{get_time()}: Saved!')
 
                 if check_conditions(exec_num, scrape_time, start_time, counter):
+                    if verbose:
+                        print(f'{get_time()}: Waiting for flight table update...')
                     update_checker.listen_for_changes()
             if verbose:
                 print(f'{get_time()}: Finishing up')
@@ -101,4 +103,4 @@ def save_flights(arrivals, departures, save_path, encoding='utf-8'):
 
 
 if __name__ == '__main__':
-    scrape_iaa_flights(exec_num=3)
+    scrape_iaa_flights(exec_num=3, scrape_time=4)
