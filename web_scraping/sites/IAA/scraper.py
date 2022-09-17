@@ -1,28 +1,23 @@
-from collections import defaultdict
-from web_scraping.sites.IAA.pages import FlightBoardPage
-# from concurrent.futures import ThreadPoolExecutor     # for speeding slow value retrieval
-from mergedeep import merge, Strategy
-from timeit import default_timer as timer
-from web_scraping.utils.tools import get_time
 import json
+from timeit import default_timer as timer
 
+from mergedeep import merge, Strategy
+
+from web_scraping.sites.IAA.pages import FlightBoardPage
+from web_scraping.utils.tools import get_time
 
 MINUTE = 60
 TIME_FACTOR = MINUTE
 
 
 def scrape_iaa_flights(exec_num=None, scrape_time=None, save_path='flight_data.json', verbose=True):
-
     if verbose:
         print('Preparing scraping...')
-    with (
-        FlightBoardPage(headless=False) as arrivals,
-        FlightBoardPage(headless=False) as departures,
+    with FlightBoardPage(headless=False) as arrivals, FlightBoardPage(headless=False) as departures:
         ## threads are used when slow value get is done to serve as queue
-        # ThreadPoolExecutor(max_workers=1) as save_exec,
-        # ThreadPoolExecutor(max_workers=1) as arriv_exec,
-        # ThreadPoolExecutor(max_workers=1) as depart_exec,
-        ):
+        # ThreadPoolExecutor(max_workers=1) as save_exec, \
+        # ThreadPoolExecutor(max_workers=1) as arriv_exec, \
+        # ThreadPoolExecutor(max_workers=1) as depart_exec:
         counter = 0
         with FlightBoardPage(observer=True, headless=False) as update_checker:
             start_time = timer()
@@ -37,7 +32,7 @@ def scrape_iaa_flights(exec_num=None, scrape_time=None, save_path='flight_data.j
                 # future_arrivals = arriv_exec.submit(arrivals.get_arrival_flights)
                 # future_departure = depart_exec.submit(departures.get_departure_flights)
                 # save_exec.submit(save_flights, future_arrivals, future_departure, save_path, verbose)
-                
+
                 # for fast value get no threads are needed
                 if verbose:
                     print(f'{get_time()}: Fetching flights...')
@@ -68,11 +63,11 @@ def check_conditions(exec_num, scrape_time, start_time, counter):
     cond2 = exec_num is None and time_cond
     cond3 = scrape_time is None and count_cond
     cond4 = time_cond and count_cond
-    res =  cond1 or cond2 or cond3 or cond4
+    res = cond1 or cond2 or cond3 or cond4
     return res
 
+
 def save_flights(arrivals, departures, save_path, encoding='utf-8'):
-    
     ## for slow value get - future result retrival
     # arrivals = arrivals.result()
     # departures = departures.result()

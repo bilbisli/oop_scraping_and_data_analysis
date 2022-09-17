@@ -1,14 +1,14 @@
-import json
 import csv
-from itertools import chain
+import json
 from datetime import datetime
+from itertools import chain
 
 
 def get_time():
     return datetime.now().strftime("%Y/%m/%d %H:%M:%S")
 
-def search_dict(master_dict, words, sep=' > '):
 
+def search_dict(master_dict, words, sep=' > '):
     if not isinstance(master_dict, dict):
         if any([word in master_dict for word in words]):
             return [str(master_dict)]
@@ -23,8 +23,8 @@ def search_dict(master_dict, words, sep=' > '):
     res = list(chain(key_list, value_list))
     return res
 
-def search_json(file_path, words, sort_results=True, drop_contained=True, encoding='utf-8'):
 
+def search_json(file_path, words, sort_results=True, drop_contained=True, encoding='utf-8'):
     with open(file_path, 'r', encoding=encoding) as fp:
         master_dict = json.load(fp)
 
@@ -40,8 +40,8 @@ def search_json(file_path, words, sort_results=True, drop_contained=True, encodi
 
     return results
 
-def search_csv(file_path, words, sort_results=True, retrieve_field_index=-1, encoding='utf-8'):
 
+def search_csv(file_path, words, sort_results=True, retrieve_field_index=-1, encoding='utf-8'):
     results = []
     with open(file_path, "r", newline='', encoding=encoding) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
@@ -54,8 +54,6 @@ def search_csv(file_path, words, sort_results=True, retrieve_field_index=-1, enc
         results.sort()
 
     return results
-
-
 
 
 if __name__ == '__main__':

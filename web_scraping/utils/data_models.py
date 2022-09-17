@@ -1,18 +1,18 @@
-import os
 import csv
+import os
 
 
 class Article(object):
-    def __init__(self, 
-        title, 
-        link, 
-        content, 
-        date_time, 
-        author=None, 
-        source=None, 
-        summary=None,
-        sentiment=None
-    ):
+    def __init__(self,
+                 title,
+                 link,
+                 content,
+                 date_time,
+                 author=None,
+                 source=None,
+                 summary=None,
+                 sentiment=None
+                 ):
         self.title = title
         self.link = link
         self.content = content
@@ -21,8 +21,9 @@ class Article(object):
         self.source = source
         self.summary = summary
         self.sentiment = sentiment
-    
-    def get_save_fields(self):
+
+    @staticmethod
+    def get_save_fields():
         # uncomment next line and comment line after for dynamic field retrieval
         # fields = [attr for attr in dir(self) if not callable(getattr(self, attr)) and not attr.startswith("__")]
         fields = ['date_time', 'title', 'content', 'author', 'source', 'summary', 'sentiment', 'link']

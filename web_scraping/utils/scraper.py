@@ -1,8 +1,5 @@
 import chromedriver_autoinstaller as browser_installer
 from selenium.webdriver import Chrome as Driver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 
 
@@ -10,6 +7,7 @@ class Scraper(Driver):
     """
     This class represents a scraping tool based on a selenium Scraper
     """
+
     def __init__(self, *args, **kwargs) -> None:
         # Makes sure current version of the browser exists and in path (to be used as driver)
         browser_installer.install()
@@ -20,7 +18,7 @@ class Scraper(Driver):
             kwargs['options'] = self.get_options()
 
         super().__init__(*args, **kwargs)
-    
+
     @staticmethod
     def get_options():
         options = Options()

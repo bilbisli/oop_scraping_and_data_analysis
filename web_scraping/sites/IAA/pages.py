@@ -1,20 +1,22 @@
+from concurrent.futures import ThreadPoolExecutor
 
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+
+from web_scraping.sites.IAA.elements import *
 from web_scraping.utils import BasePage
 from web_scraping.utils import Scraper
-from web_scraping.sites.IAA.locators import FlightPageLocators
-from web_scraping.sites.IAA.elements import *
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from concurrent.futures import ThreadPoolExecutor
-from selenium.webdriver.common.by import By
-
 
 MAXIMUM_WAIT_FOR_UPDATE_MINUTES = 30
 TIME_INTERVAL = 120
 
+
 class FlightBoardPage(BasePage):
     def __init__(self, driver=None, headless=True, observer=False):
 
+        self.updated_time = None
+        self.observable_element = None
         options = Scraper.get_options()
         if headless is False:
             options.headless = False
@@ -22,7 +24,7 @@ class FlightBoardPage(BasePage):
 
         self.base_url = 'https://www.iaa.gov.il/airports/ben-gurion/flight-board'
         self.driver.get(self.base_url)
-        
+
         self.update_button = UpdateButton()
         self.load_button = LoadMoreButton()
         self.arrival_tab = ArrivalTab()
@@ -31,41 +33,39 @@ class FlightBoardPage(BasePage):
         if observer is True:
             self.load_observable()
 
+    def load_observable(self, observable_locator=None):
 
-    def load_observable(self, obsrvbl_loc=None):
-
-        if obsrvbl_loc is None:
-            obsrvbl_loc = FlightPageLocators.AIRLINES
-            self.obsrvbl_elmnt = obsrvbl_loc.get_elements(
+        if observable_locator is None:
+            observable_locator = FlightPageLocators.AIRLINES
+            self.observable_element = observable_locator.get_elements(
                 self.driver,
-                single=True, 
+                single=True,
                 tries=3,
                 refresh_between_tries=True,
                 # exp_cond=EC.visibility_of_element_located,
                 # wait_time=30
             )
-            
+
         else:
-            self.obsrvbl_elmnt = obsrvbl_loc.get_elements(self.driver, single=True)
+            self.observable_element = observable_locator.get_elements(self.driver, single=True)
         time_obs = FlightPageLocators.UPDATED_TIME
         self.updated_time = time_obs.get_end_value(self.driver)
-        
-        return self.obsrvbl_elmnt
 
-    def listen_for_changes(self, obsrvbl_elmnt=None, listener=None):
-        if obsrvbl_elmnt == None:
-            obsrvbl_elmnt = self.obsrvbl_elmnt
+        return self.observable_element
+
+    def listen_for_changes(self, observable_element=None, listener=None):
+        if observable_element is None:
+            observable_element = self.observable_element
         if listener is None:
             listener = self.driver
-        
+
         prev_time = self.updated_time
         while prev_time == self.updated_time:
-            
-            WebDriverWait(listener, 
-                TIME_INTERVAL,
-                ).until(EC.staleness_of(obsrvbl_elmnt))
+            WebDriverWait(listener,
+                          TIME_INTERVAL,
+                          ).until(EC.staleness_of(observable_element))
             self.load_observable()
-            obsrvbl_elmnt = self.obsrvbl_elmnt
+            observable_element = self.observable_element
         prev_time = self.updated_time
 
     def toggle_flight_update(self, driver=None, button=None):
@@ -83,7 +83,7 @@ class FlightBoardPage(BasePage):
 
         if locator is None:
             locator = FlightPageLocators.ARRIVAL_FLIGHTS_TABLE
-        
+
         arrivals_data = self.get_data(locator)
         return arrivals_data
 
@@ -94,15 +94,15 @@ class FlightBoardPage(BasePage):
 
         if locator is None:
             locator = FlightPageLocators.DEPARTURE_FLIGHTS_TABLE
-        
+
         departures_data = self.get_data(locator, additional='departure')
         return departures_data
-    
+
     def get_data(self, locator, additional=None):
 
         table_element = locator.get_elements(self.driver, single=True)
         self.load_button.load_all_results(self.driver)
-        
+
         fields = [
             'airline',
             'flight',
@@ -126,12 +126,12 @@ class FlightBoardPage(BasePage):
         if additional == 'departure':
             fields.append('checkin_counter')
             locators.append(FlightPageLocators.FLIGHT_COUNTER)
-
+        ## this calls slow value retrieval method!
         # values = self.get_values_slow(table_element, locators)
         values = self.get_values_fast(locators)
-        
+
         table_values = dict(zip(fields, values))
-        
+
         return table_values
 
     def get_values_fast(self, locators):
@@ -147,16 +147,13 @@ class FlightBoardPage(BasePage):
             )
         return values
 
-    def get_values_slow(self, table_element, locators):
+    @staticmethod
+    def get_values_slow(table_element, locators):
         future_elements, values = [], []
         with ThreadPoolExecutor(max_workers=9) as elements_pool:
             for loc in locators:
                 future_elements.append(elements_pool.submit(loc.get_end_value, table_element))
-            # simluate thread pool join
+            # simulates thread pool join
             for fut_ele in future_elements:
                 values.append(fut_ele.result())
         return values
-
-
-    
-

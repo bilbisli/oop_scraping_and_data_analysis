@@ -1,12 +1,9 @@
+from tqdm import tqdm
 
-from multiprocessing.connection import wait
-from web_scraping.sites.BBC.elements import ArticleLinkElements
-from web_scraping.sites.BBC.locators import HomePageLocators, NewsPageLocators
 from web_scraping.sites.BBC.handlers import NewsPageHandler, SportsPageHandler
+from web_scraping.sites.BBC.locators import HomePageLocators
 from web_scraping.utils import BasePage
 from web_scraping.utils.data_models import Article
-from selenium.common.exceptions import TimeoutException
-from tqdm import tqdm
 
 
 class MainPage(BasePage):
@@ -15,7 +12,6 @@ class MainPage(BasePage):
 
         self.article_locator = article_locator
         self.article_links = []
-        # self.article_titles = []
         self.base_url = 'https://www.bbc.com/'
         self.driver.get(self.base_url)
 
@@ -26,7 +22,6 @@ class MainPage(BasePage):
 
         self.article_links = locator.get_end_value(self.driver)
         return self.article_links
-
 
     def validate_links(self, links=None):
         if links is None:
@@ -39,12 +34,12 @@ class MainPage(BasePage):
                     link = link[1:]
                 link = self.base_url + link
             return link
-        
+
         links = list(map(add_base_url, links))
         self.article_links = links
 
         return links
-            
+
 
 class ArticlePage(BasePage):
     def __init__(self, driver=None):
@@ -56,7 +51,7 @@ class ArticlePage(BasePage):
     def get_articles_from_links(self, article_links=None, verbose=True):
         if article_links is None:
             article_links = self.article_links
-        
+
         articles_bar = tqdm(article_links, leave=False, disable=not verbose)
         for link in articles_bar:
             locator_cls = self.handler.handle(link)
@@ -84,5 +79,5 @@ class ArticlePage(BasePage):
                     source = ''
                 article = Article(title, link, content, date_time, author, source)
                 self.articles.append(article)
-        
+
         return self.articles

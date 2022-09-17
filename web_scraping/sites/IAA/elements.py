@@ -1,6 +1,5 @@
-
-from web_scraping.utils import BasePageElement
 from web_scraping.sites.IAA.locators import FlightPageLocators
+from web_scraping.utils import BasePageElement
 
 
 class UpdateButton(BasePageElement):
@@ -11,7 +10,7 @@ class LoadMoreButton(BasePageElement):
     locator = FlightPageLocators.LOAD_MORE_BUTTON
 
     def load_all_results(self, driver):
-        
+
         while True:
             curr_results_loc = FlightPageLocators.CURRENT_RESULTS.get_end_value(driver, single=True)
             all_results_loc = FlightPageLocators.ALL_RESULTS.get_end_value(driver, single=True)
