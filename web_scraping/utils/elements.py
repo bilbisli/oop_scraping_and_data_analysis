@@ -52,7 +52,4 @@ class BasePageElement(object, metaclass=abc.ABCMeta):
             single=True
         )
         
-        
-        # WebDriverWait(driver, wait_time).until(
-        #     EC.element_to_be_clickable((self.locator.by, self.locator.loc_str)))
         driver.execute_script("arguments[0].click();", button)

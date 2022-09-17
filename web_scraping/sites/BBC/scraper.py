@@ -1,8 +1,6 @@
-import data_analysis.sentiment_analysis as sentiment_analyser
-from web_scraping.utils import Scraper
-from web_scraping.sites.BBC.locators import NewsPageLocators
+from  web_scraping.utils.data_analysis import SentimentAnalysis as sentiment_analyser
+from  web_scraping.utils.data_analysis import ArticleSummarization as summarizer
 from web_scraping.sites.BBC.pages import MainPage, ArticlePage
-import data_analysis.article_summarization as summarizer
 from tqdm import tqdm
 
 

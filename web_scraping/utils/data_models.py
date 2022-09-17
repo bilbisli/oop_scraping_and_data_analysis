@@ -28,7 +28,6 @@ class Article(object):
         fields = ['date_time', 'title', 'content', 'author', 'source', 'summary', 'sentiment', 'link']
         return fields
 
-
     @staticmethod
     def save_articles(articles, save_path='bbc_articles.csv', encoding='UTF8'):
         if not articles:

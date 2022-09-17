@@ -1,6 +1,6 @@
 
 
-class BasePageHandler():
+class BasePageHandler(object):
     """Parent class of all concrete handlers"""
  
     def __init__(self, nxt, locators):
