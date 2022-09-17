@@ -6,8 +6,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 class BasePageElement(object, metaclass=abc.ABCMeta):
     """
-    Base page class that is initialized on every page object class.
-    Used for selecting and interacting with page elements.
+    Base web page element class that is initialized on every web page object class.
+    Used for interacting with web page elements.
     """
 
     @classmethod
@@ -19,12 +19,10 @@ class BasePageElement(object, metaclass=abc.ABCMeta):
 
     def __set__(self, obj, value):
         """Sets the text to the value supplied"""
-
         driver = obj.driver
         element = WebDriverWait(driver, 100).until(
-            EC.presence_of_element_located(self.locator)
+            EC.presence_of_element_located((self.locator.by, self.locator.loc_str))
         )
-
         element.clear()
         element.send_keys(value)
 
@@ -32,9 +30,8 @@ class BasePageElement(object, metaclass=abc.ABCMeta):
         """Gets the text of the specified object"""
         driver = obj.driver
         element = WebDriverWait(driver, 100).until(
-            EC.presence_of_element_located(self.locator.by, self.locator.loc_str)
+            EC.presence_of_element_located((self.locator.by, self.locator.loc_str))
         )
-
         return element.get_attribute("value")
 
     def click(self,
@@ -44,6 +41,9 @@ class BasePageElement(object, metaclass=abc.ABCMeta):
               tries=1,
               refresh_between_tries=False,
               ):
+        """
+        This method activates web element click operation
+        """
         button = self.locator.get_elements(
             driver=driver,
             wait_time=wait_time,
@@ -52,5 +52,4 @@ class BasePageElement(object, metaclass=abc.ABCMeta):
             refresh_between_tries=refresh_between_tries,
             single=True
         )
-
         driver.execute_script("arguments[0].click();", button)

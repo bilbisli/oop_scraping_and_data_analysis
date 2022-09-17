@@ -21,6 +21,10 @@ class Scraper(Driver):
 
     @staticmethod
     def get_options():
+        """
+        Returns:
+            an ``Options`` object for the driver used with default options set
+        """
         options = Options()
         options.add_argument("--headless")
         options.add_argument('--disable-gpu')

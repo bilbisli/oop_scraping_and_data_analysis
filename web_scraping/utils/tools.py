@@ -8,27 +8,62 @@ def get_time():
     return datetime.now().strftime("%Y/%m/%d %H:%M:%S")
 
 
-def search_dict(master_dict, words, sep=' > '):
+def search_dict(master_dict, keywords, sep=' > '):
+    """
+    This function searches a dictionary for given keywords recursively and constructs the paths to keyword found
+
+    Example:
+        $>>> dictionary = {'1':
+        ...                    '1.2':
+        ...                        {'1.2.3': 12},
+        ...                    'three': 3
+        ...                    }
+        ...               }
+        $>>> search_dict(dictionary, keywords=['4', '3'])
+        ['1 > 1.2 > 1.2.3', '1 > three > 3']
+        $>>> search_dict(dictionary, keywords=['2', '0'])
+        ['1 > 1.2', '1 > 1.2 > 1.2.3', '1 > 1.2 > 1.2.3 > 12']
+
+    Args:
+        master_dict (dict): the dictionary to search
+        keywords (list[str]): the given keywords to search for
+        sep (str): the string that will separate each node in the path
+
+    Returns:
+        list[str]: a list of the found constructed results
+    """
     if not isinstance(master_dict, dict):
-        if any([word in master_dict for word in words]):
+        if any([word in str(master_dict) for word in keywords]):
             return [str(master_dict)]
         else:
             return []
-    key_list = list(filter(None, (search_dict(k, words) for k in master_dict.keys())))
+    key_list = list(filter(None, (search_dict(k, keywords) for k in master_dict.keys())))
     value_list = []
     for k, v in master_dict.items():
-        for l in search_dict(v, words):
+        for l in search_dict(v, keywords):
             value_list.append(f'{k}{sep}{l[0] if isinstance(l, list) else l}')
 
     res = list(chain(key_list, value_list))
     return res
 
 
-def search_json(file_path, words, sort_results=True, drop_contained=True, encoding='utf-8'):
+def search_json(file_path, keywords, sort_results=True, drop_contained=True, encoding='utf-8'):
+    """
+    This function searches a json file using :func:``search_dict``
+    Args:
+        file_path (str): path to json file
+        keywords (list[str]): the given keywords to search for
+        sort_results (bool): whether to sort the results or not
+        drop_contained (bool): whether to drop results contained in other results or not
+        encoding (:obj:str, optional): encoding type
+
+    Returns:
+        list[str]: a list of the found constructed results
+    """
     with open(file_path, 'r', encoding=encoding) as fp:
         master_dict = json.load(fp)
 
-    results = search_dict(master_dict, words)
+    results = search_dict(master_dict, keywords)
     if drop_contained:
         tmp_res = []
         for el1 in results:
@@ -41,13 +76,24 @@ def search_json(file_path, words, sort_results=True, drop_contained=True, encodi
     return results
 
 
-def search_csv(file_path, words, sort_results=True, retrieve_field_index=-1, encoding='utf-8'):
+def search_csv(file_path, keywords, sort_results=True, retrieve_field_index=-1, encoding='utf-8'):
+    """
+    This function searches a csv and for each keyword found returns a value from the same row
+    Args:
+        file_path (str): path to csv file
+        keywords (list[str]):
+        sort_results (bool): whether to sort the results or not
+        retrieve_field_index (int): index of value to retrieve for the keyword found in the same row
+        encoding (:obj:str, optional): encoding type
+    Returns:
+        list[str]: a list of values retrieved from the rows containing a keyword
+    """
     results = []
     with open(file_path, "r", newline='', encoding=encoding) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         for row in csv_reader:
             for field in row:
-                if any(word.casefold() in field.casefold() for word in words):
+                if any(word.casefold() in field.casefold() for word in keywords):
                     results.append(row[retrieve_field_index])
 
     if sort_results:
@@ -57,7 +103,7 @@ def search_csv(file_path, words, sort_results=True, retrieve_field_index=-1, enc
 
 
 if __name__ == '__main__':
-    words = ('דאבי', "5W 7085", "5W 7086")
+    words = ['דאבי', "5W 7085", "5W 7086"]
     d = {
         "flights": {
             "arrivals": {

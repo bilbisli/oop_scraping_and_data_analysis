@@ -3,22 +3,38 @@ from transformers import pipeline
 
 
 class SentimentAnalysis(object):
-    """
-    Class for retrieving text sentiment analysis
-    """
+    """Class for applying text sentiment analysis"""
     MAX_INPUT_LENGTH = 512
     model_name = "cardiffnlp/twitter-roberta-base-sentiment-latest"
 
     @classmethod
-    def analyse_sentiment(cls, article, model=None):
+    def analyse_sentiment(cls, text, model=None):
+        """
+        This method analyses the sentiment of an article content
+        Args:
+            text (str): text to analyse its sentiment
+            model: model to use
+
+        Returns:
+            dict[str, str|float]: the sentiment label ('label' key) prediction of the article and the certainty
+            score ('score' key) of the prediction
+        """
         if model is None:
             classifier = cls.get_model()
         else:
             classifier = model
-        return classifier(article, truncation=True)[0]
+        return classifier(text, truncation=True)[0]
 
     @classmethod
     def get_model(cls, model_name=None):
+        """
+        This method builds a pipeline and returns the model to analyse the sentiment
+        Args:
+            model_name (str): name of model to use
+
+        Returns:
+            the model to analyse the sentiment
+        """
         logging.set_verbosity_error()
         if model_name is None:
             model_name = cls.model_name
@@ -29,18 +45,30 @@ class SentimentAnalysis(object):
 
 
 class ArticleSummarization(object):
+    """Class for applying text summarization utilizing a model trained on news articles summarization"""
     MAX_INPUT_LENGTH = 1024
     model_name = "facebook/bart-large-cnn"
 
     @classmethod
-    def summarize(cls, article, model=None, max_length=100, min_length=50):
+    def summarize(cls, article_content, model=None, max_length=100, min_length=50):
+        """
+        This methode summarizes a given article
+        Args:
+            article_content (str): the article content to summarize
+            model: model to use
+            max_length: maximum length of desired summary
+            min_length: minimum length of desired summary
+
+        Returns:
+            dict[str, str]: the summary of the article ('summary_text' key) prediction of the article
+        """
         if model is None:
             summarizer = cls.get_model()
         else:
             summarizer = model
         if max_length > cls.MAX_INPUT_LENGTH:
             max_length = cls.MAX_INPUT_LENGTH
-        res = summarizer(article,
+        res = summarizer(article_content,
                          max_length=max_length,
                          min_length=min_length,
                          truncation=True,
@@ -49,6 +77,14 @@ class ArticleSummarization(object):
 
     @classmethod
     def get_model(cls, model_name=None):
+        """
+        This method builds a pipeline and returns the model to summarize with
+        Args:
+            model_name (str): name of model to use
+
+        Returns:
+            the model to summarize with
+        """
         if model_name is None:
             model_name = cls.model_name
         return pipeline("summarization", model=model_name, tokenizer=model_name)

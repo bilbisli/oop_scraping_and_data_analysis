@@ -8,6 +8,8 @@ from web_scraping.utils.locators import ArticlePageLocators
 
 
 class HomePageLocators(BasePageLocators):
+    """This class packs BBC home page locators together"""
+    # desired article element to focus upon on the page
     ARTICLE_ELEMENT = Locator(
         By.CSS_SELECTOR,
         "a.block-link__overlay-link:not([rev*='video'],[rev*='picture'],[href*='/reel/'],[href*='/video/'],"
@@ -19,6 +21,7 @@ class HomePageLocators(BasePageLocators):
 
 
 class NewsPageLocators(ArticlePageLocators):
+    """This class packs BBC news page locators together"""
     ARTICLE_CONTENT = Locator(
         By.CSS_SELECTOR,
         "div[data-component='text-block']",
@@ -39,6 +42,7 @@ class NewsPageLocators(ArticlePageLocators):
 
 
 class SportPageLocators(ArticlePageLocators):
+    """This class packs BBC sport page locators together"""
     ARTICLE_CONTENT = Locator(
         By.CSS_SELECTOR,
         "div[class='gel-layout__item gel-2/3@l'] h2, div[class='gel-layout__item gel-2/3@l'] \

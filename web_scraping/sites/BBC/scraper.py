@@ -5,13 +5,22 @@ from web_scraping.utils.data_analysis import ArticleSummarization
 from web_scraping.utils.data_analysis import SentimentAnalysis
 
 
-def scrape_bbc_main_page_articles(save_path='bbc_articles.csv', summarization=False, sentiment_analysis=True,
+def scrape_bbc_main_page_articles(save_path='bbc_articles.csv',
+                                  summarization=False,
+                                  sentiment_analysis=True,
                                   verbose=True):
+    """
+    This function fetches articles that are featured in the BBC main page
+    Args:
+        save_path (str): the path in which to save the unified article data (including file_name.csv)
+        summarization: whether to add summarization to the articles or not
+        sentiment_analysis: whether to add sentiment analysis to the articles or not
+        verbose: toggles verbosity of the system
+    """
     with MainPage() as main_page:
         if verbose:
             print('Getting article links from main page...')
         links = main_page.get_article_links()
-
     with ArticlePage() as article_page:
         if verbose:
             print('Getting articles...')
