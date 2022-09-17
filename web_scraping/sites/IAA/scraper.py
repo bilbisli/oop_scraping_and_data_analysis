@@ -10,7 +10,7 @@ MINUTE = 60
 TIME_FACTOR = MINUTE
 
 
-def scrape_iaa_flights(exec_num=None, scrape_time=None, save_path='flight_data.json', verbose=True):
+def scrape_iaa_flights(save_path='flight_data.json', exec_num=None, scrape_time=None, verbose=True):
     """
     This function fetches all the flight data from the IAA flight board in realtime
     Args:
@@ -75,9 +75,9 @@ def check_conditions(exec_num, scrape_time, start_time, counter):
     """
     time_cond = scrape_time and (timer() - start_time) / TIME_FACTOR < scrape_time
     count_cond = exec_num and counter < exec_num
-    cond1 = exec_num is None and scrape_time is None
+    cond1 = not exec_num and not scrape_time
     cond2 = exec_num is None and time_cond
-    cond3 = scrape_time is None and count_cond
+    cond3 = not scrape_time and count_cond
     cond4 = time_cond and count_cond
     res = cond1 or cond2 or cond3 or cond4
     return res

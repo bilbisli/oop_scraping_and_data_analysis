@@ -7,8 +7,10 @@ from web_scraping.utils.data_analysis import SentimentAnalysis
 
 def scrape_bbc_main_page_articles(save_path='bbc_articles.csv',
                                   summarization=False,
-                                  sentiment_analysis=True,
-                                  verbose=True):
+                                  sentiment_analysis=False,
+                                  verbose=True,
+                                  sum_model=None,
+                                  sent_model=None):
     """
     This function fetches articles that are featured in the BBC main page
     Args:
@@ -16,6 +18,8 @@ def scrape_bbc_main_page_articles(save_path='bbc_articles.csv',
         summarization: whether to add summarization to the articles or not
         sentiment_analysis: whether to add sentiment analysis to the articles or not
         verbose: toggles verbosity of the system
+        sum_model: model for summarization - will load anew if not given
+        sent_model: model for sentiment analysis - will load anew if not given
     """
     with MainPage() as main_page:
         if verbose:
@@ -30,14 +34,16 @@ def scrape_bbc_main_page_articles(save_path='bbc_articles.csv',
                 if verbose:
                     print('Summarizing articles...')
                     print('Note: This may take a while')
-                sum_model = ArticleSummarization.get_model()
+                if not sum_model:
+                    sum_model = ArticleSummarization.get_model()
                 for article in tqdm(articles, leave=False, disable=not verbose):
                     article.summary = ArticleSummarization.summarize(article.content, model=sum_model)['summary_text']
             if sentiment_analysis:
                 if verbose:
                     print('Analysing sentiments...')
                     print('Note: This may take a while')
-                sent_model = SentimentAnalysis.get_model()
+                if not sent_model:
+                    sent_model = SentimentAnalysis.get_model()
                 for article in tqdm(articles, leave=False, disable=not verbose):
                     article.sentiment = SentimentAnalysis.analyse_sentiment(article.content, model=sent_model)['label']
             if verbose:
