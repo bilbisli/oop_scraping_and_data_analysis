@@ -164,12 +164,11 @@ if __name__ == '__main__':
         }
     }
     res = search_json('flight_data.json', words)
-    print(type(res))
-
     for l in res:
         print(l)
+
     print('\n----\n')
-    res = search_csv('bbc_articles.csv', ['queen', 'gang', 'looloo'])
+    res = search_csv('bbc_articles.csv', ['queen', 'gang', 'loop'])
     print(len(res))
     for r in res:
         print(r)
