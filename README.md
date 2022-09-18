@@ -1,6 +1,15 @@
-# OOP Web Scraping & Analysis
-Scraping news sites and summarizing them with sentiment analysis + real-time flight scraping and json\csv search capabilities
+# Modular OOP Web Scraping & Data Analysis
+Scraping web sites and summarizing them with sentiment analysis + real-time flight scraping and json\csv search capabilities
 
+
+## Features
+- Retrieving articles that are currently on [BBC main page](https://www.bbc.com/)
+- Summarizing articles to desired min/max length (up to 512) - may be applied upon article retrieval
+- Text Sentiment Analysis - may be applied upon article retrieval
+- Search phrases in a csv file and retrieve a desired value in the row where the phrase was found
+- Retrieve live flight data from [IAA Flight Board Page](http://www.iaa.gov.il/he-IL/airports/BenGurion/Pages/OnlineFlights.aspx)
+- Search phrases in a json file and retrieve the path leading to where the phrase was found
+- Use as base module to construct your own OOP modular web scraper
 
 ## Installation
 The project was develepoed in _python 3.10.6_
@@ -131,7 +140,7 @@ The structure of the modules was constructed base on [Selenium docs on Page Obje
 This kind of structure makes the system extremely modular
 
 
-## Key Functions
+## Key Classes & Functions
 ##### Data Analysis
 -  `web_scraping.utils.tools.search_json` - The **function** that searches flight data (json) file - uses the 'search_dict' function for the search operation, search example:
 ```
@@ -156,7 +165,7 @@ https://www.bbc.com/news/world-europe-62943902
 - `web_scraping.sites.IAA.scraper.scrape_iaa_flights` - The IAA website scraping **function**
 - `web_scraping.sites.IAA.pages.FlightBoardPage` - The flight board page ***class*** which can act either as a listener, which waits until the flight table is updated or as a worker, fetching arrival/departure flight data once the listener is prompted by a flight data change
 ##### General
-- `web_scraping.example` - A simple **_script_** as an example of using the different modules as a way to show how the system works
+- `web_scraping.example` - A simple _**script**_ as an example of using the different modules as a way to show how the system works
 
 
 
