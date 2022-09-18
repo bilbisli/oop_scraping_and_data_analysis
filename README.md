@@ -133,11 +133,13 @@ The structure of the modules was constructed base on [Selenium docs on Page Obje
 | Ref | Name | Details |
 | ------| ------ | ------ |
 |*| **`elements`** | Page element objects to systematically interact with the elements of the web page|
-|**| **`handlers`** |Handelrs were my own addition which implement the Chain of Responsibility Dsign Pattern for handling many different article pages which are built diffrently than each other|
+|**| **`handlers`** | Handelrs were my own addition which implement the Chain of Responsibility Dsign Pattern for handling many different article pages which are built diffrently than each other|
 | *** | **`locators`** | Locators are used for locating elements in the page, i improved the design by adding a Locator class which not only stores what's necessary for locating elements in the page but also fetching the desired values from the elements (text for example) |
 | **** | **`pages`** | Pages are abstractions of a web page which consist the operations that can be done on a web page for the desired task at hand  |
 |  ***** | **`scraper`** | The base Scraper schema is built around a web driver to allow the opening and interactions with the browser and the other scraper files host the function that does the heavy lifting of the web scraping pipeline |
+
 This kind of structure makes the system extremely modular
+
 
 
 ## Key Classes & Functions
