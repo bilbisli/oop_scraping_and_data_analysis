@@ -4,9 +4,9 @@ Scraping news sites and summarizing them with sentiment analysis + real-time fli
 
 ## Installation
 The project was develepoed in _python 3.10.6_
-Install the dependecies using the requirements.txt:
+Install the dependencies using the requirements.txt:
 ```sh
-cd news_scraping_take_home
+cd oop_scraping_and_data_analysis-main
 pip install -r requirements.txt
 ```
 * Finally, add the 'web_scraping' module to **`PATH`**
@@ -19,8 +19,8 @@ from web_scraping.sites import BBC, IAA
 from web_scraping.utils.tools import search_json, search_csv
 
 articles_path = '~/my/path/to/file/articles.csv'
-BBC.scraper(save_path=articles_path, summarization=True, sentiment_analysis=True)
 flights_path = '~/my/path/to/file/flights.json'
+BBC.scraper(save_path=articles_path, summarization=True, sentiment_analysis=True)
 IAA.scraper(save_path=flights_path, exec_num=3, scrape_time=5)
 
 search_results = search_csv(file_path=articles_path, 
@@ -35,7 +35,55 @@ print('The flight search results are:')
 for result in search_results:
     print(result)
 ```
+Output:
+```
+Getting article links from main page...
+Getting articles...
+Summarizing articles...
+Note: This may take a while
+Analysing sentiments...
+Note: This may take a while
+Saving articles...
+Articles saved!
+Preparing scraping...
+2022/09/18 08:11:15: Starting scraping...
+2022/09/18 08:11:15: Scraping round 1
+2022/09/18 08:11:15: Fetching flights...
+2022/09/18 08:11:54: Flights fetched
+2022/09/18 08:11:54: saving...
+2022/09/18 08:12:06: Saved!
+2022/09/18 08:12:06: Waiting for flight table update...
+2022/09/18 08:12:16: Scraping round 2
+2022/09/18 08:12:16: Fetching flights...
+2022/09/18 08:12:48: Flights fetched
+2022/09/18 08:12:48: saving...
+2022/09/18 08:12:48: Saved!
+2022/09/18 08:12:48: Waiting for flight table update...
+2022/09/18 08:13:45: Scraping round 3
+2022/09/18 08:13:45: Fetching flights...
+2022/09/18 08:14:07: Flights fetched
+2022/09/18 08:14:07: saving...
+2022/09/18 08:14:07: Saved!
+2022/09/18 08:14:07: Finishing up
+2022/09/18 08:14:18: Done.
+The articles search results are:
+https://www.bbc.com/news/entertainment-arts-62925113
+https://www.bbc.com/news/uk-62943911
+https://www.bbc.com/news/uk-62944148
+https://www.bbc.com/news/uk-england-suffolk-62924487
+https://www.bbc.com/sport/football/62859265
+https://www.bbc.com/sport/football/62859267
+The flight search results are:
+flights > arrivals > 5W 7085 אבו דאבי 18/09 > city > אבו דאבי
+flights > arrivals > 5W 7085 אבו דאבי 18/09 > flight > 5W 7085
+flights > arrivals > EY 598 אבו דאבי 18/09 > city > אבו דאבי
+flights > arrivals > LY 9600 אבו דאבי 18/09 > city > אבו דאבי
+flights > departures > 5W 7086 אבו דאבי 18/09 > city > אבו דאבי
+flights > departures > EY 599 אבו דאבי 18/09 > city > אבו דאבי
+flights > departures > LY 9601 אבו דאבי 18/09 > city > אבו דאבי
 
+Process finished with exit code 0
+```
 
 
 
@@ -80,7 +128,7 @@ The structure of the modules was constructed base on [Selenium docs on Page Obje
 | *** | **`locators`** | Locators are used for locating elements in the page, i improved the design by adding a Locator class which not only stores what's necessary for locating elements in the page but also fetching the desired values from the elements (text for example) |
 | **** | **`pages`** | Pages are abstractions of a web page which consist the operations that can be done on a web page for the desired task at hand  |
 |  ***** | **`scraper`** | The base Scraper schema is built around a web driver to allow the opening and interactions with the browser and the other scraper files host the function that does the heavy lifting of the web scraping pipeline |
-This kind of structure makes the system extremly modular
+This kind of structure makes the system extremely modular
 
 
 ## Key Functions
@@ -99,8 +147,8 @@ https://www.bbc.com/news/world-europe-62943902
 ```
 
 
-- `web_scraping.utils.data_analysis.SentimentAnalysis` -- The sentiment analysis ***class***
-- `web_scraping.utils.data_analysis.ArticleSummarization` -- The article summarization ***class***
+- `web_scraping.utils.data_analysis.SentimentAnalysis` -- The sentiment analysis ***class*** -  chosen RoBertA model trained for sentiment analysis on twitter
+- `web_scraping.utils.data_analysis.ArticleSummarization` -- The article summarization ***class*** - chosen the _bart-large-cnn_ model for it's good performance and because it was trained on (CNN) news articles which is the data that we are dealing with
 ##### BBC Module
 - `web_scraping.sites.BBC.scraper.scrape_bbc_main_page_articles` - The BBC website scraping **function**
 - `web_scraping.sites.BBC.pages.ArticlePage` - The article page ***class*** which implements Chain of Responsibility in order to find the appropriate locator pack to handle different (News & Sports) pages formatting in the same pipeline thus making the system more adjustable
