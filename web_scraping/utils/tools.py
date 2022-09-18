@@ -95,10 +95,9 @@ def search_csv(file_path, keywords, sort_results=True, retrieve_field_index=-1, 
             for field in row:
                 if any(word.casefold() in field.casefold() for word in keywords):
                     results.append(row[retrieve_field_index])
-
+    results = list(set(results))
     if sort_results:
         results.sort()
-
     return results
 
 

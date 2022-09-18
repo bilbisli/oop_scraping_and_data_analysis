@@ -1,9 +1,11 @@
-from web_scraping.utils.tools import search_json
-from web_scraping.utils.data_analysis import ArticleSummarization, SentimentAnalysis
+import os
+
 from web_scraping.sites import BBC, IAA
+from web_scraping.utils.data_analysis import ArticleSummarization, SentimentAnalysis
+from web_scraping.utils.tools import search_json, search_csv
 
 
-def main():
+def example():
     """
     Just an example of how the system can be used
     """
@@ -16,11 +18,11 @@ def main():
         user_choice = prompt_input(menu_str(), lambda x: x.isdigit() and int(x) in range(1, 8), int)
         if user_choice == 1:
             path = input('Choose a path to save the csv file (including file_name.csv):\n')
-            add_sentiment = prompt_input(lambda x: x.isdigit() and int(x) in range(2),
-                                         "Add sentiment analysis?\n(0) no\n(1) yes",
+            add_sentiment = prompt_input("Add sentiment analysis?\n(0) no\n(1) yes",
+                                         lambda x: x.isdigit() and int(x) in range(2),
                                          int)
-            add_summary = prompt_input(lambda x: x.isdigit() and int(x) in range(2),
-                                       "Add summary?\n(0) no\n(1) yes",
+            add_summary = prompt_input("Add summary?\n(0) no\n(1) yes",
+                                       lambda x: x.isdigit() and int(x) in range(2),
                                        int)
             BBC.scraper(save_path=path,
                         summarization=add_summary,
@@ -32,19 +34,27 @@ def main():
             time_limit = prompt_input("Enter time limit (0 for no limit): ",
                                       lambda x: x.isdigit(),
                                       float)
-            execution_limit = prompt_input(lambda x: x.is_digit(),
-                                           "Enter number of updates limit (0 for no limit): ",
+            execution_limit = prompt_input("Enter number of updates limit (0 for no limit): ",
+                                           lambda x: x.isdigit(),
                                            int)
+            print('Note: three browsers will be opened during this operation')
             IAA.scraper(save_path=path, exec_num=execution_limit, scrape_time=time_limit)
         elif user_choice == 3:
-            path = prompt_input('Choose a path of json to search (including file_name.json)')
+            path = prompt_input('Choose a path of json to search (including file_name.json)', os.path.exists)
             phrases = input(
                 'Enter phrases to search seperated by space padded commas (phrase1 , phrase2):\n').split(' , ')
-            search_json(file_path=path, keywords=phrases)
+            search_results = search_json(file_path=path, keywords=phrases)
+            print('The search results are:')
+            for result in search_results:
+                print(result)
         elif user_choice == 4:
-            path = prompt_input('Choose a path of csv to search (including file_name.csv)')
-            phrases = input('Enter phrases to search seperated by space padded commas (phrase1 , phrase2)').split(' , ')
-            search_json(file_path=path, keywords=phrases)
+            path = prompt_input('Choose a path of csv to search (including file_name.csv)', os.path.exists)
+            phrases = input(
+                'Enter phrases to search seperated by space padded commas (phrase1 , phrase2):\n').split(' , ')
+            print('The search results are:')
+            search_results = search_csv(file_path=path, keywords=phrases)
+            for result in search_results:
+                print(result)
         elif user_choice == 5 or user_choice == 6:
             print("Enter text and press 'enter' twice when finished:")
             article_content = ''
@@ -87,7 +97,7 @@ def prompt_input(message, cond=None, convert=None, error_msg='Invalid choice'):
     while True:
         print(message)
         user_choice = input("Enter your choice: ")
-        if cond and cond(user_choice):
+        if not cond or cond(user_choice):
             break
         print(error_msg)
     if convert:
@@ -96,4 +106,4 @@ def prompt_input(message, cond=None, convert=None, error_msg='Invalid choice'):
 
 
 if __name__ == '__main__':
-    main()
+    example()

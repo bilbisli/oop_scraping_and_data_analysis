@@ -3,7 +3,7 @@ import os
 
 
 class Article(object):
-    """This class represents an article object scheme"""
+    """This class represents an article object schema"""
     def __init__(self,
                  title,
                  link,

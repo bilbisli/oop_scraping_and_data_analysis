@@ -13,6 +13,7 @@ TIME_FACTOR = MINUTE
 def scrape_iaa_flights(save_path='flight_data.json', exec_num=None, scrape_time=None, verbose=True):
     """
     This function fetches all the flight data from the IAA flight board in realtime
+    opens 3 browsers: for arrivals, for departures & for update observer
     Args:
         exec_num (int): number of times to fetch the updated flight data - no limit by default
         scrape_time (float|int): time period in which flight retrieval will be done - no limit by default
