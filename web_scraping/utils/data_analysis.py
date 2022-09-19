@@ -56,8 +56,8 @@ class ArticleSummarization(object):
         Args:
             article_content (str): the article content to summarize
             model: model to use
-            max_length: maximum length of desired summary
-            min_length: minimum length of desired summary
+            max_length (int): maximum length of desired summary
+            min_length (int): minimum length of desired summary
 
         Returns:
             dict[str, str]: the summary of the article ('summary_text' key) prediction of the article
