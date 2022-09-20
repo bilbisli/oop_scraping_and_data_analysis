@@ -4,7 +4,7 @@ Scraping web sites and summarizing them with sentiment analysis + real-time flig
 
 ## Features
 - Retrieving articles that are currently on [BBC main page](https://www.bbc.com/)
-- Summarizing articles to desired min/max length (up to 512) - may be applied upon article retrieval
+- Summarizing articles to desired min/max length - may be applied upon article retrieval
 - Text Sentiment Analysis - may be applied upon article retrieval
 - Search phrases in a csv file and retrieve a desired value in the row where the phrase was found
 - Retrieve live flight data from [IAA Flight Board Page](http://www.iaa.gov.il/he-IL/airports/BenGurion/Pages/OnlineFlights.aspx)
