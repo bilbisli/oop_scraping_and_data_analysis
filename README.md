@@ -16,7 +16,7 @@ The project was developed in _python 3.10.6_ with _selenium_
 
 Install the dependencies using the requirements.txt:
 ```sh
-cd oop_scraping_and_data_analysis-main
+cd oop_scraping_and_data_analysis
 pip install -r requirements.txt
 ```
 * Finally, add the 'web_scraping' module to **`PATH`**
