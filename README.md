@@ -12,7 +12,7 @@ Scraping web sites and summarizing them with sentiment analysis + real-time flig
 - Use as base module to construct your own OOP modular web scraper
 
 ## Installation
-The project was develepoed in _python 3.10.6_ with _selenium_
+The project was developed in _python 3.10.6_ with _selenium_
 
 Install the dependencies using the requirements.txt:
 ```sh
