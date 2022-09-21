@@ -1,5 +1,6 @@
 import json
 from timeit import default_timer as timer
+from concurrent.futures import ThreadPoolExecutor
 
 from mergedeep import merge, Strategy
 
@@ -22,11 +23,9 @@ def scrape_iaa_flights(save_path='flight_data.json', exec_num=None, scrape_time=
     """
     if verbose:
         print('Preparing scraping...')
-    with FlightBoardPage(headless=False) as arrivals, FlightBoardPage(headless=False) as departures:
-        ## threads are used when slow value get is done to serve as queue
-        # ThreadPoolExecutor(max_workers=1) as save_exec, \
-        # ThreadPoolExecutor(max_workers=1) as arriv_exec, \
-        # ThreadPoolExecutor(max_workers=1) as depart_exec:
+    with (FlightBoardPage(headless=False) as arrivals, 
+        FlightBoardPage(headless=False) as departures, 
+        ThreadPoolExecutor(max_workers=2) as flight_exec):
         counter = 0
         with FlightBoardPage(observer=True, headless=False) as update_checker:
             start_time = timer()
@@ -37,21 +36,11 @@ def scrape_iaa_flights(save_path='flight_data.json', exec_num=None, scrape_time=
                 if verbose:
                     print(f'{get_time()}: Scraping round', counter)
                     print(f'{get_time()}: Fetching flights...')
-
-                ## using threads as queue when using slow value get so as not to interrupt current data retrieval
-                # future_arrivals = arriv_exec.submit(arrivals.get_arrival_flights)
-                # future_departure = depart_exec.submit(departures.get_departure_flights)
-                # save_exec.submit(save_flights, future_arrivals, future_departure, save_path, verbose)
-                # for fast value fetch method no threads are needed
-                arrival = arrivals.get_arrival_flights()
-                departure = departures.get_departure_flights()
+                future_arrivals = flight_exec.submit(arrivals.get_arrival_flights)
+                future_departures = flight_exec.submit(departures.get_departure_flights)
+                save_flights(future_arrivals, future_departures, save_path)
                 if verbose:
-                    print(f'{get_time()}: Flights fetched')
-                if verbose:
-                    print(f'{get_time()}: saving...')
-                save_flights(arrival, departure, save_path=save_path)
-                if verbose:
-                    print(f'{get_time()}: Saved!')
+                    print(f'{get_time()}: Flights fetched and saved!')
                 if check_conditions(exec_num, scrape_time, start_time, counter):
                     if verbose:
                         print(f'{get_time()}: Waiting for flight table update...')
@@ -85,9 +74,8 @@ def check_conditions(exec_num, scrape_time, start_time, counter):
 
 
 def save_flights(arrivals, departures, save_path, encoding='utf-8'):
-    ## for slow value get - future result retrieval
-    # arrivals = arrivals.result()
-    # departures = departures.result()
+    arrivals = arrivals.result()
+    departures = departures.result()
 
     unified_dict = dict()
     unified_dict['flights'] = {'arrivals': {}, 'departures': {}}
